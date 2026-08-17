@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Candour Software — Digital Engineering for Real Businesses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#12142B',
+                        muted: '#667085',
+                        surface: '#FFFFFF',
+                        canvas: '#F5F6FC',
+                        deep: '#0D0E22',
+                        deep2: '#151735',
+                        primary: { DEFAULT:'#5B5FEF', dark:'#4338CA', light:'#8B8EF6' },
+                        coral: { DEFAULT:'#FF6B4A', soft:'#FFE7DF' },
+                        line: '#E6E8F5',
+                    },
+                    fontFamily: {
+                        display: ['Sora','sans-serif'],
+                        body: ['Inter','sans-serif'],
+                        mono: ['JetBrains Mono','monospace'],
+                    },
+                    boxShadow: {
+                        soft: '0 20px 45px -18px rgba(91,95,239,0.25)',
+                        softcard: '0 10px 30px -12px rgba(18,20,43,0.12)',
+                        glow: '0 0 0 1px rgba(255,255,255,0.06), 0 20px 60px -20px rgba(91,95,239,0.55)',
+                    },
+                    borderRadius: { '4xl':'2rem', '5xl':'2.5rem' },
+                },
+            },
+        };
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family:'Inter',sans-serif; background:#F5F6FC; color:#12142B; }
+        h1,h2,h3,h4,.font-display{ font-family:'Sora',sans-serif; }
+        .mono{ font-family:'JetBrains Mono',monospace; }
+
+        ::selection{ background:#5B5FEF; color:#fff; }
+
+        /* scrollbar */
+        ::-webkit-scrollbar{ width:10px; height:10px; }
+        ::-webkit-scrollbar-track{ background:transparent; }
+        ::-webkit-scrollbar-thumb{ background:#D9DCF3; border-radius:99px; }
+
+        /* reveal on scroll */
+        .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s cubic-bezier(.19,1,.22,1), transform .8s cubic-bezier(.19,1,.22,1); }
+        .reveal.in{ opacity:1; transform:translateY(0); }
+
+        /* marquee */
+        .marquee-track{ display:flex; width:max-content; animation:marquee 28s linear infinite; }
+        .marquee-track:hover{ animation-play-state:paused; }
+        @keyframes marquee{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+        /* floating */
+        @keyframes floaty{ 0%,100%{ transform:translateY(0) rotate(var(--r,0deg)); } 50%{ transform:translateY(-14px) rotate(var(--r,0deg)); } }
+        .float{ animation:floaty 6s ease-in-out infinite; }
+        .float-slow{ animation:floaty 9s ease-in-out infinite; }
+
+        @keyframes blob{ 0%,100%{ transform:translate(0,0) scale(1);} 33%{ transform:translate(30px,-20px) scale(1.08);} 66%{ transform:translate(-20px,20px) scale(0.95);} }
+        .blob{ animation:blob 14s ease-in-out infinite; }
+
+        @keyframes barGrow{ from{ transform:scaleY(0);} to{ transform:scaleY(1);} }
+        .bar{ transform-origin:bottom; animation:barGrow 1.2s cubic-bezier(.19,1,.22,1) both; }
+
+        @keyframes dash{ to{ stroke-dashoffset:0; } }
+        .draw{ stroke-dasharray:400; stroke-dashoffset:400; animation:dash 2.2s ease forwards; }
+
+        @keyframes pulseDot{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+        .pulse-dot{ animation:pulseDot 1.8s ease-in-out infinite; }
+
+        /* dropdown */
+        .nav-drop{ opacity:0; visibility:hidden; transform:translateY(8px); transition:all .25s ease; }
+        .group:hover .nav-drop{ opacity:1; visibility:visible; transform:translateY(0); }
+
+        /* accordion arrow */
+        details > summary{ list-style:none; cursor:pointer; }
+        details > summary::-webkit-details-marker{ display:none; }
+        details[open] .faq-icon{ transform:rotate(45deg); }
+
+        /* mesh gradient */
+        .mesh{
+            background:
+                    radial-gradient(38% 42% at 15% 20%, rgba(91,95,239,0.16), transparent 60%),
+                    radial-gradient(32% 38% at 85% 15%, rgba(255,107,74,0.14), transparent 60%),
+                    radial-gradient(45% 45% at 70% 80%, rgba(91,95,239,0.10), transparent 60%);
+        }
+        .mesh-dark{
+            background:
+                    radial-gradient(35% 40% at 20% 25%, rgba(91,95,239,0.35), transparent 60%),
+                    radial-gradient(30% 35% at 85% 20%, rgba(255,107,74,0.22), transparent 60%),
+                    radial-gradient(40% 40% at 60% 85%, rgba(91,95,239,0.25), transparent 60%);
+        }
+
+        .tree-line{ position:relative; }
+        .card-hover{ transition:transform .35s cubic-bezier(.19,1,.22,1), box-shadow .35s ease; }
+        .card-hover:hover{ transform:translateY(-6px); }
+
+        .tooltip{ opacity:0; visibility:hidden; transform:translate(-50%,6px) scale(.96); transition:all .2s ease; }
+        .node:hover .tooltip{ opacity:1; visibility:visible; transform:translate(-50%,0) scale(1); }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- ============ NAVIGATION ============ -->
+<header id="top" class="fixed top-0 inset-x-0 z-50">
+    <div class="mx-3 mt-3 md:mx-6 md:mt-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/75 backdrop-blur-xl shadow-softcard px-4 md:px-6 py-3">
+
+            <!-- logo -->
+            <a href="#top" class="flex items-center gap-2.5 shrink-0">
+                <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                    <path d="M27 6.5C23.7 3.6 19.4 2 17 2 8.7 2 2 8.7 2 17s6.7 15 15 15c4.3 0 8.2-1.8 11-4.7" stroke="#FF6B4A" stroke-width="3.4" stroke-linecap="round"/>
+                    <circle cx="24" cy="10" r="2.6" fill="#5B5FEF"/>
+                </svg>
+                <span class="font-display font-800 text-xl tracking-tight text-ink">CANDOUR<span class="text-coral">.</span></span>
+            </a>
+
+            <!-- desktop nav -->
+            <nav class="hidden lg:flex items-center gap-1 font-medium text-[14.5px] text-ink/80">
+                <a href="#top" class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors">Home</a>
+
+                <div class="group relative">
+                    <button class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors flex items-center gap-1">About
+                        <svg class="w-3 h-3 mt-px opacity-60" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="nav-drop absolute left-1/2 -translate-x-1/2 top-full pt-3 w-72">
+                        <div class="rounded-3xl bg-white border border-line shadow-soft p-2.5">
+                            <a href="#about" class="flex items-start gap-3 p-3 rounded-2xl hover:bg-canvas transition-colors">
+                <span class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <svg class="w-4.5 h-4.5" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+                </span>
+                                <span><span class="block text-ink font-semibold">Company Overview</span><span class="block text-xs text-muted mt-0.5">Who we are & what we build</span></span>
+                            </a>
+                            <a href="#vision" class="flex items-start gap-3 p-3 rounded-2xl hover:bg-canvas transition-colors">
+                <span class="w-9 h-9 rounded-xl bg-coral/10 flex items-center justify-center text-coral shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </span>
+                                <span><span class="block text-ink font-semibold">Vision & Mission</span><span class="block text-xs text-muted mt-0.5">Where we're headed</span></span>
+                            </a>
+                            <a href="#howwework" class="flex items-start gap-3 p-3 rounded-2xl hover:bg-canvas transition-colors">
+                <span class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2.6" stroke="currentColor" stroke-width="1.7"/><circle cx="6" cy="18" r="2.6" stroke="currentColor" stroke-width="1.7"/><circle cx="18" cy="18" r="2.6" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.6V13M12 13l-4.6 3M12 13l4.6 3" stroke="currentColor" stroke-width="1.6"/></svg>
+                </span>
+                                <span><span class="block text-ink font-semibold">Leadership Team</span><span class="block text-xs text-muted mt-0.5">The people behind delivery</span></span>
+                            </a>
+                            <a href="#why" class="flex items-start gap-3 p-3 rounded-2xl hover:bg-canvas transition-colors">
+                <span class="w-9 h-9 rounded-xl bg-coral/10 flex items-center justify-center text-coral shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.35-9.5-9C.7 8 2.4 4 6.2 4c2 0 3.3 1 3.8 2.2C10.5 5 11.8 4 13.8 4c3.8 0 5.5 4 3.7 8-2.5 4.65-9.5 9-9.5 9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </span>
+                                <span><span class="block text-ink font-semibold">Why Choose Us</span><span class="block text-xs text-muted mt-0.5">10Y+ of production-tested code</span></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative">
+                    <button class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors flex items-center gap-1">Service
+                        <svg class="w-3 h-3 mt-px opacity-60" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="nav-drop absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[560px]">
+                        <div class="rounded-3xl bg-white border border-line shadow-soft p-4 grid grid-cols-2 gap-1">
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs">📊</span><span class="text-[13.5px] text-ink/85">Dashboard Development</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-coral/10 flex items-center justify-center text-coral text-xs">🧩</span><span class="text-[13.5px] text-ink/85">Enterprise Admin Panels</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs">🌐</span><span class="text-[13.5px] text-ink/85">Web & App Development</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-coral/10 flex items-center justify-center text-coral text-xs">📈</span><span class="text-[13.5px] text-ink/85">Data Analysis & BI</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs">🔁</span><span class="text-[13.5px] text-ink/85">CRM & Service Mgmt</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-coral/10 flex items-center justify-center text-coral text-xs">🎓</span><span class="text-[13.5px] text-ink/85">Learning Mgmt Systems</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs">🚚</span><span class="text-[13.5px] text-ink/85">Fleet Management</span></a>
+                            <a href="#services" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-canvas transition-colors"><span class="w-7 h-7 rounded-lg bg-coral/10 flex items-center justify-center text-coral text-xs">✅</span><span class="text-[13.5px] text-ink/85">QA & Performance</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative">
+                    <button class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors flex items-center gap-1">Technology
+                        <svg class="w-3 h-3 mt-px opacity-60" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="nav-drop absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[520px]">
+                        <div class="rounded-3xl bg-white border border-line shadow-soft p-5 grid grid-cols-3 gap-4">
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-2">Backend</p>
+                                <p class="text-[13px] text-ink/80 leading-7">PHP (OOP)<br>Java / Spring Boot<br>Node.js / TypeScript</p>
+                            </div>
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-coral mb-2">Frontend</p>
+                                <p class="text-[13px] text-ink/80 leading-7">React<br>Tailwind CSS<br>Bootstrap</p>
+                            </div>
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-2">Data & Infra</p>
+                                <p class="text-[13px] text-ink/80 leading-7">MySQL / JPA<br>Highcharts / BI<br>Firebase · Python ML</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative">
+                    <button class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors flex items-center gap-1">Products
+                        <svg class="w-3 h-3 mt-px opacity-60" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="nav-drop absolute left-1/2 -translate-x-1/2 top-full pt-3 w-[600px]">
+                        <div class="rounded-3xl bg-white border border-line shadow-soft p-5 grid grid-cols-3 gap-5">
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-2">Dashboards</p>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">ASC Performance</a>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">Inventory Status</a>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">Pending & Closed Calls</a>
+                            </div>
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-coral mb-2">Admin Panels</p>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-coral">Lexcare EV Panel</a>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-coral">CANDOUR EV Panel</a>
+                            </div>
+                            <div>
+                                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-2">Enterprise Systems</p>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">Fleet Mgmt (FMS)</a>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">LMS</a>
+                                <a href="#products" class="block text-[13px] text-ink/80 py-1 hover:text-primary">Form Mgmt System</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative">
+                    <button class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors flex items-center gap-1">Portfolio
+                        <svg class="w-3 h-3 mt-px opacity-60" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="nav-drop absolute left-1/2 -translate-x-1/2 top-full pt-3 w-64">
+                        <div class="rounded-3xl bg-white border border-line shadow-soft p-2.5">
+                            <a href="#portfolio" class="block p-3 rounded-2xl hover:bg-canvas transition-colors"><span class="block text-ink font-semibold text-sm">Our Portfolio</span><span class="block text-xs text-muted">Case studies & delivered work</span></a>
+                            <a href="#clients" class="block p-3 rounded-2xl hover:bg-canvas transition-colors"><span class="block text-ink font-semibold text-sm">Client Information</span><span class="block text-xs text-muted">Who trusts Candour</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="#contact" class="px-3.5 py-2 rounded-full hover:text-primary hover:bg-primary/5 transition-colors">Contact Us</a>
+            </nav>
+
+            <div class="hidden lg:flex items-center gap-3">
+                <a href="#contact" class="group inline-flex items-center gap-2 rounded-full bg-ink text-white text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary transition-all shadow-softcard">
+                    Request Demo
+                    <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+
+            <!-- mobile toggle -->
+            <button id="menuBtn" class="lg:hidden w-10 h-10 rounded-full bg-ink/5 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="#12142B" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- mobile menu -->
+    <div id="mobileMenu" class="hidden lg:hidden mx-3 mt-2">
+        <div class="rounded-3xl bg-white border border-line shadow-soft p-4 max-h-[75vh] overflow-y-auto">
+            <a href="#top" class="block py-2.5 font-medium text-ink border-b border-line/70">Home</a>
+            <a href="#about" class="block py-2.5 font-medium text-ink border-b border-line/70">About</a>
+            <a href="#services" class="block py-2.5 font-medium text-ink border-b border-line/70">Services</a>
+            <a href="#technology" class="block py-2.5 font-medium text-ink border-b border-line/70">Technology</a>
+            <a href="#products" class="block py-2.5 font-medium text-ink border-b border-line/70">Products</a>
+            <a href="#portfolio" class="block py-2.5 font-medium text-ink border-b border-line/70">Portfolio</a>
+            <a href="#contact" class="block py-2.5 font-medium text-ink">Contact Us</a>
+            <a href="#contact" class="mt-3 block text-center rounded-full bg-ink text-white text-sm font-semibold px-5 py-2.5">Request Demo</a>
+        </div>
+    </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="relative overflow-hidden pt-40 pb-28 md:pt-48 md:pb-36 mesh">
+    <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-primary/20 blur-3xl blob"></div>
+    <div class="absolute top-10 -right-20 w-[28rem] h-[28rem] rounded-full bg-coral/20 blur-3xl blob" style="animation-delay:-6s"></div>
+
+    <div class="max-w-7xl mx-auto px-5 md:px-8 relative grid lg:grid-cols-[1.05fr_0.95fr] gap-16 items-center">
+        <div class="reveal">
+      <span class="mono inline-flex items-center gap-2 text-[11.5px] uppercase tracking-wider text-primary bg-primary/8 border border-primary/15 rounded-full px-4 py-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+        Now building with AI-augmented workflows
+      </span>
+
+            <h1 class="font-display font-800 text-[2.6rem] leading-[1.08] md:text-6xl md:leading-[1.06] text-ink mt-6">
+                Dashboards & systems<br>
+                that <span class="relative inline-block text-primary">run businesses
+          <svg class="absolute -bottom-2 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 8C40 2 160 2 198 8" stroke="#FF6B4A" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+        </span>,<br>not just look pretty.
+            </h1>
+
+            <p class="text-muted text-[16.5px] leading-relaxed mt-6 max-w-lg">
+                Candour Software designs and engineers the service dashboards, admin panels and enterprise systems that automotive, EV and service-network businesses run on every single day — accurate data, fast pages, zero drama.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 mt-9">
+                <a href="#contact" class="group inline-flex items-center gap-2 rounded-full bg-primary text-white font-semibold px-6 py-3.5 shadow-soft hover:bg-primary-dark transition-all">
+                    Start a Project
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a href="#portfolio" class="inline-flex items-center gap-2 rounded-full border border-ink/15 text-ink font-semibold px-6 py-3.5 hover:bg-white transition-colors">
+                    See Our Work
+                </a>
+            </div>
+
+            <div class="flex items-center gap-8 mt-12">
+                <div><p class="font-display font-800 text-2xl text-ink">200+</p><p class="text-xs text-muted mt-0.5">Projects delivered</p></div>
+                <div class="w-px h-9 bg-line"></div>
+                <div><p class="font-display font-800 text-2xl text-ink">100K+</p><p class="text-xs text-muted mt-0.5">Users worldwide</p></div>
+                <div class="w-px h-9 bg-line"></div>
+                <div><p class="font-display font-800 text-2xl text-ink">10Y+</p><p class="text-xs text-muted mt-0.5">In production</p></div>
+            </div>
+        </div>
+
+        <!-- floating dashboard mockup -->
+        <div class="relative reveal" style="transition-delay:.15s">
+            <div class="relative w-full max-w-md mx-auto">
+                <div class="float rounded-4xl bg-white border border-line shadow-soft p-5" style="--r:-1.2deg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-coral"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-primary/40"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-ink/10"></span>
+                        </div>
+                        <span class="mono text-[10px] text-muted">asc-performance.dash</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2.5 mb-4">
+                        <div class="rounded-2xl bg-primary/8 p-3">
+                            <p class="mono text-[10px] text-primary/70">TAT AVG</p>
+                            <p class="font-display font-700 text-lg text-ink">3.2h</p>
+                        </div>
+                        <div class="rounded-2xl bg-coral/8 p-3">
+                            <p class="mono text-[10px] text-coral/80">CLOSED</p>
+                            <p class="font-display font-700 text-lg text-ink">1,284</p>
+                        </div>
+                        <div class="rounded-2xl bg-ink/5 p-3">
+                            <p class="mono text-[10px] text-muted">UPTIME</p>
+                            <p class="font-display font-700 text-lg text-ink">99.9%</p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl bg-canvas p-4 flex items-end gap-2 h-28">
+                        <div class="bar w-full rounded-md bg-primary/30" style="height:40%; animation-delay:.05s"></div>
+                        <div class="bar w-full rounded-md bg-primary/50" style="height:65%; animation-delay:.15s"></div>
+                        <div class="bar w-full rounded-md bg-primary" style="height:90%; animation-delay:.25s"></div>
+                        <div class="bar w-full rounded-md bg-coral/60" style="height:55%; animation-delay:.35s"></div>
+                        <div class="bar w-full rounded-md bg-primary/40" style="height:75%; animation-delay:.45s"></div>
+                        <div class="bar w-full rounded-md bg-primary/70" style="height:50%; animation-delay:.55s"></div>
+                    </div>
+
+                    <svg class="mt-3" width="100%" height="46" viewBox="0 0 300 46" fill="none">
+                        <path class="draw" d="M2 34C40 10 70 40 110 22C150 4 180 30 220 18C250 8 270 26 298 12" stroke="#5B5FEF" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <!-- floating badge 1 -->
+                <div class="float-slow absolute -left-8 top-10 rounded-2xl bg-deep text-white shadow-glow px-4 py-3 flex items-center gap-2.5" style="--r:2deg">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+                    <div>
+                        <p class="text-[11px] font-semibold">Live sync active</p>
+                        <p class="mono text-[9.5px] text-white/50">null-safe · zero N+1</p>
+                    </div>
+                </div>
+
+                <!-- floating badge 2 -->
+                <div class="float absolute -right-6 -bottom-6 rounded-2xl bg-white shadow-soft border border-line px-4 py-3" style="--r:-2deg; animation-delay:-3s">
+                    <p class="text-[11px] font-semibold text-ink flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="#FF6B4A"/></svg>
+                        AI-assisted QA
+                    </p>
+                    <p class="text-[10px] text-muted mt-0.5">Faster releases, fewer bugs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ TRUST MARQUEE ============ -->
+<section class="py-10 border-y border-line bg-white overflow-hidden">
+    <p class="text-center mono text-[11px] uppercase tracking-wider text-muted mb-6">Trusted by service-driven brands</p>
+    <div class="marquee-track gap-16 px-8">
+        <div class="flex items-center gap-16 shrink-0">
+            <span class="font-display font-700 text-xl text-ink/40">OKAYA EV</span>
+            <span class="font-display font-700 text-xl text-ink/40">LEXCARE·LECTRIX</span>
+            <span class="font-display font-700 text-xl text-ink/40">HINDWARE</span>
+            <span class="font-display font-700 text-xl text-ink/40">VELO SERVICES</span>
+            <span class="font-display font-700 text-xl text-ink/40">KARBONN MOBILES</span>
+        </div>
+        <div class="flex items-center gap-16 shrink-0 pl-16" aria-hidden="true">
+            <span class="font-display font-700 text-xl text-ink/40">OKAYA EV</span>
+            <span class="font-display font-700 text-xl text-ink/40">LEXCARE·LECTRIX</span>
+            <span class="font-display font-700 text-xl text-ink/40">HINDWARE</span>
+            <span class="font-display font-700 text-xl text-ink/40">VELO SERVICES</span>
+            <span class="font-display font-700 text-xl text-ink/40">KARBONN MOBILES</span>
+        </div>
+    </div>
+</section>
+
+<!-- ============ COMPANY INTRO ============ -->
+<section id="about" class="py-28 px-5 md:px-8">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+        <div class="reveal">
+            <svg width="46" height="46" viewBox="0 0 34 34" fill="none" class="mb-6">
+                <path d="M27 6.5C23.7 3.6 19.4 2 17 2 8.7 2 2 8.7 2 17s6.7 15 15 15c4.3 0 8.2-1.8 11-4.7" stroke="#FF6B4A" stroke-width="3.4" stroke-linecap="round"/>
+                <circle cx="24" cy="10" r="2.6" fill="#5B5FEF"/>
+            </svg>
+            <span class="mono text-[11px] uppercase tracking-wider text-primary">Company Overview</span>
+            <h2 class="font-display font-800 text-4xl md:text-[2.6rem] leading-tight text-ink mt-3">
+                A decade of building the software behind service networks.
+            </h2>
+            <p class="text-muted text-[15.5px] leading-relaxed mt-5">
+                Candour Software is a full-stack engineering studio that partners directly with operations teams — not just IT. We've shipped ASC performance dashboards, EV admin panels, fleet systems and LMS platforms that real engineers and dealers use every day, across 5+ countries.
+            </p>
+            <div class="grid grid-cols-2 gap-4 mt-8">
+                <div id="vision" class="rounded-3xl bg-white border border-line p-5 card-hover shadow-softcard">
+                    <p class="mono text-[10.5px] uppercase text-primary mb-1.5">Vision</p>
+                    <p class="text-sm text-ink/80 leading-relaxed">Be the most trusted engineering partner for service-driven businesses.</p>
+                </div>
+                <div class="rounded-3xl bg-white border border-line p-5 card-hover shadow-softcard">
+                    <p class="mono text-[10.5px] uppercase text-coral mb-1.5">Mission</p>
+                    <p class="text-sm text-ink/80 leading-relaxed">Turn operational chaos into clear, null-safe, real-time dashboards.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal grid grid-cols-2 gap-4" style="transition-delay:.1s">
+            <div class="rounded-4xl bg-gradient-to-br from-primary to-primary-dark text-white p-7 flex flex-col justify-between h-56 shadow-soft">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.7"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.7"/></svg>
+                <div><p class="font-display font-700 text-2xl">Full-Stack</p><p class="text-white/70 text-sm mt-1">PHP · Java · Node.js · React</p></div>
+            </div>
+            <div class="rounded-4xl bg-white border border-line p-7 flex flex-col justify-between h-56 mt-8 shadow-softcard">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="#FF6B4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div><p class="font-display font-700 text-2xl text-ink">Data-Accurate</p><p class="text-muted text-sm mt-1">Zero N+1, strict null-safety</p></div>
+            </div>
+            <div class="rounded-4xl bg-white border border-line p-7 flex flex-col justify-between h-56 shadow-softcard">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#5B5FEF" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <div><p class="font-display font-700 text-2xl text-ink">Fast Delivery</p><p class="text-muted text-sm mt-1">Iterative, founder-involved</p></div>
+            </div>
+            <div class="rounded-4xl bg-gradient-to-br from-coral to-[#FF8A6E] text-white p-7 flex flex-col justify-between h-56 mt-8 shadow-soft">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.35-9.5-9C.7 8 2.4 4 6.2 4c2 0 3.3 1 3.8 2.2C10.5 5 11.8 4 13.8 4c3.8 0 5.5 4 3.7 8-2.5 4.65-9.5 9-9.5 9z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <div><p class="font-display font-700 text-2xl">10Y+ Trust</p><p class="text-white/80 text-sm mt-1">Long client relationships</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section id="services" class="py-28 px-5 md:px-8 bg-white border-y border-line">
+    <div class="max-w-7xl mx-auto">
+        <div class="max-w-xl reveal">
+            <span class="mono text-[11px] uppercase tracking-wider text-primary">What We Do</span>
+            <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">Services built around operational reality.</h2>
+            <p class="text-muted mt-4 text-[15.5px]">From first requirement call to production monitoring — one accountable team, end to end.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-14">
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard">
+                <div class="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 19V9M12 19V4M20 19v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Dashboard Development</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">KPI cards, closure-time performance and TAT reporting wired to real, null-safe data.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.05s">
+                <div class="w-11 h-11 rounded-2xl bg-coral/10 flex items-center justify-center text-coral mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Enterprise Admin Panels</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Controller → Service → Repository architecture with clean, permissioned CRUD modules.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.1s">
+                <div class="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M9 18h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Web & App Development</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">React + Node/TS or PHP builds, responsive across desktop, tablet and mobile.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.15s">
+                <div class="w-11 h-11 rounded-2xl bg-coral/10 flex items-center justify-center text-coral mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M7 15l4-5 3 3 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Data Analysis & BI</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Highcharts visualizations, bucket distributions and engineer-aging trend analysis.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard">
+                <div class="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 20l-3-3M13 17l3 3M4 4l16 16M4 20L20 4" stroke="currentColor" stroke-width="0"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">CRM & Service Mgmt</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Call tracking, pending/closed workflows and multi-level reporting tables.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.05s">
+                <div class="w-11 h-11 rounded-2xl bg-coral/10 flex items-center justify-center text-coral mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8l9-5 9 5-9 5-9-5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Learning Mgmt Systems</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Course, category and role-based access management on React + Firebase.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.1s">
+                <div class="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="8" width="14" height="8" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M16 11h3l3 3v2h-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">Fleet Management</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Session-based auth, role masters and live Highcharts fleet dashboards.</p>
+            </div>
+            <div class="reveal card-hover rounded-3xl bg-canvas border border-line p-6 shadow-softcard" style="transition-delay:.15s">
+                <div class="w-11 h-11 rounded-2xl bg-coral/10 flex items-center justify-center text-coral mb-5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <h3 class="font-display font-700 text-lg text-ink">QA & Performance</h3>
+                <p class="text-sm text-muted mt-2 leading-relaxed">Query optimization, pagination and cross-browser regression checks.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ TECHNOLOGY strip ============ -->
+<section id="technology" class="py-24 px-5 md:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="max-w-xl reveal">
+            <span class="mono text-[11px] uppercase tracking-wider text-coral">Technology</span>
+            <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">Tools we trust in production.</h2>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-5 mt-12">
+            <div class="reveal rounded-3xl bg-deep text-white p-7 mesh-dark">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-primary-light mb-3">Backend</p>
+                <p class="font-display text-xl leading-8">PHP (OOP)<br>Java / Spring Boot<br>Node.js / TypeScript</p>
+            </div>
+            <div class="reveal rounded-3xl bg-deep text-white p-7 mesh-dark" style="transition-delay:.05s">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-coral mb-3">Frontend</p>
+                <p class="font-display text-xl leading-8">React<br>Tailwind CSS<br>Bootstrap</p>
+            </div>
+            <div class="reveal rounded-3xl bg-deep text-white p-7 mesh-dark" style="transition-delay:.1s">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-primary-light mb-3">Data & Infra</p>
+                <p class="font-display text-xl leading-8">MySQL / JPA<br>Highcharts<br>Firebase · Python ML</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ PRODUCTS ============ -->
+<section id="products" class="py-28 px-5 md:px-8 bg-white border-y border-line">
+    <div class="max-w-7xl mx-auto">
+        <div class="max-w-xl reveal">
+            <span class="mono text-[11px] uppercase tracking-wider text-primary">Products & Solutions</span>
+            <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">What we've actually shipped.</h2>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6 mt-14">
+            <div class="reveal rounded-4xl border border-line p-7 card-hover shadow-softcard">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-4">Dashboards & Analytics</p>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>ASC Performance Dashboard</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Inventory Status Dashboard</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Pending & Closed Calls Dashboard</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>BSI Pendency Dashboard</li>
+                </ul>
+            </div>
+            <div class="reveal rounded-4xl border border-line p-7 card-hover shadow-softcard" style="transition-delay:.05s">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-coral mb-4">Admin Panels</p>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-coral"></span>Lexcare by Lectrix EV Admin Panel</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-coral"></span>CANDOUR EV Admin Panel</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-coral"></span>Part / Brand / Vendor / BOM Masters</li>
+                </ul>
+            </div>
+            <div class="reveal rounded-4xl border border-line p-7 card-hover shadow-softcard" style="transition-delay:.1s">
+                <p class="mono text-[10.5px] uppercase tracking-wider text-primary mb-4">Enterprise Systems</p>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Fleet Management System (FMS)</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Learning Management System (LMS)</li>
+                    <li class="flex items-center gap-3 text-sm text-ink/80"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Form Management System + OCR</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ WHY CHOOSE US ============ -->
+<section id="why" class="py-28 px-5 md:px-8">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-[0.85fr_1.15fr] gap-14 items-start">
+        <div class="reveal lg:sticky lg:top-32">
+            <span class="mono text-[11px] uppercase tracking-wider text-coral">Why Choose Us</span>
+            <h2 class="font-display font-800 text-4xl md:text-[2.6rem] leading-tight text-ink mt-3">Not an agency.<br>Your engineering partner.</h2>
+            <p class="text-muted text-[15.5px] leading-relaxed mt-5">Founder-involved, production-tested, and built for teams who need dashboards that are actually correct.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-5">
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard"><p class="font-display font-700 text-lg text-ink mb-1.5">Null-safe by default</p><p class="text-sm text-muted leading-relaxed">Reusable safe-render helpers mean no broken widgets from missing data.</p></div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.05s"><p class="font-display font-700 text-lg text-ink mb-1.5">Founder-involved</p><p class="text-sm text-muted leading-relaxed">You talk directly to the person writing your architecture.</p></div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.1s"><p class="font-display font-700 text-lg text-ink mb-1.5">Query-optimized</p><p class="text-sm text-muted leading-relaxed">N+1 patterns fixed, server-side pagination as standard.</p></div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.15s"><p class="font-display font-700 text-lg text-ink mb-1.5">Fast iteration</p><p class="text-sm text-muted leading-relaxed">Weekly, visible progress — not a black box for 3 months.</p></div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard"><p class="font-display font-700 text-lg text-ink mb-1.5">Real-time dashboards</p><p class="text-sm text-muted leading-relaxed">Live JSON-bound widgets, chart reflow, and KPI accuracy checks.</p></div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.05s"><p class="font-display font-700 text-lg text-ink mb-1.5">Long-term relationships</p><p class="text-sm text-muted leading-relaxed">10Y+ clients who keep coming back for the next module.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ HOW WE WORK - TREE ============ -->
+<section id="howwework" class="py-28 px-5 md:px-8 bg-white border-y border-line overflow-x-auto">
+    <div class="max-w-5xl mx-auto text-center reveal">
+        <span class="mono text-[11px] uppercase tracking-wider text-primary">How We Work</span>
+        <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">One team, three fronts, six hands on deck.</h2>
+        <p class="text-muted mt-4 max-w-lg mx-auto text-[15.5px]">Hover any node to see exactly who owns what on your project.</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto mt-16 reveal min-w-[640px]">
+        <!-- owner -->
+        <div class="flex justify-center">
+            <div class="node relative">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary-dark shadow-soft flex items-center justify-center text-white font-display font-700 text-xl cursor-default">RP</div>
+                <div class="tooltip absolute left-1/2 top-full mt-3 w-56 bg-deep text-white text-xs rounded-2xl p-3.5 z-20 shadow-glow">
+                    <p class="font-semibold mb-1">Ravi Prakash — Founder & CEO</p>
+                    <p class="text-white/60">Client relationships, architecture calls, final QA sign-off.</p>
+                </div>
+                <p class="text-center text-xs font-semibold text-ink mt-2">Founder</p>
+            </div>
+        </div>
+
+        <!-- connector -->
+        <div class="flex justify-center"><div class="w-px h-8 bg-line"></div></div>
+        <div class="relative"><div class="absolute left-1/2 -translate-x-1/2 -top-0 w-[66%] h-px bg-line"></div></div>
+
+        <!-- 3 leads -->
+        <div class="grid grid-cols-3 gap-6 pt-8">
+            <div class="flex flex-col items-center">
+                <div class="w-px h-6 bg-line"></div>
+                <div class="node relative">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-display font-700 cursor-default">FA</div>
+                    <div class="tooltip absolute left-1/2 top-full mt-3 w-52 bg-deep text-white text-xs rounded-2xl p-3.5 z-20 shadow-glow">
+                        <p class="font-semibold mb-1">Full-Stack Architecture Lead</p>
+                        <p class="text-white/60">Owns PHP/MySQL dashboards & data modelling.</p>
+                    </div>
+                </div>
+                <p class="text-center text-[11px] font-semibold text-ink mt-2 leading-tight">Architecture<br>Lead</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-px h-6 bg-line"></div>
+                <div class="node relative">
+                    <div class="w-16 h-16 rounded-2xl bg-coral/10 border border-coral/20 flex items-center justify-center text-coral font-display font-700 cursor-default">ES</div>
+                    <div class="tooltip absolute left-1/2 top-full mt-3 w-52 bg-deep text-white text-xs rounded-2xl p-3.5 z-20 shadow-glow">
+                        <p class="font-semibold mb-1">Enterprise Systems Lead</p>
+                        <p class="text-white/60">Owns Spring Boot, Node.js & integrations.</p>
+                    </div>
+                </div>
+                <p class="text-center text-[11px] font-semibold text-ink mt-2 leading-tight">Systems<br>Lead</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-px h-6 bg-line"></div>
+                <div class="node relative">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-display font-700 cursor-default">PQ</div>
+                    <div class="tooltip absolute left-1/2 top-full mt-3 w-52 bg-deep text-white text-xs rounded-2xl p-3.5 z-20 shadow-glow">
+                        <p class="font-semibold mb-1">Product & QA Lead</p>
+                        <p class="text-white/60">Owns React UI, UX polish & release QA.</p>
+                    </div>
+                </div>
+                <p class="text-center text-[11px] font-semibold text-ink mt-2 leading-tight">Product & QA<br>Lead</p>
+            </div>
+        </div>
+
+        <!-- 6 members -->
+        <div class="grid grid-cols-3 gap-6 pt-8">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">BE</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">Backend Developer</p><p class="text-white/60 mt-0.5">PHP modules & API endpoints.</p></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">DB</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">Database Engineer</p><p class="text-white/60 mt-0.5">Schema design & query tuning.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">JD</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">Java Developer</p><p class="text-white/60 mt-0.5">Spring Boot services & JPA.</p></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">IE</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">Integration Engineer</p><p class="text-white/60 mt-0.5">Third-party & API integrations.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">FE</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">Frontend Developer</p><p class="text-white/60 mt-0.5">React components & Tailwind UI.</p></div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-px h-6 bg-line"></div>
+                    <div class="node relative">
+                        <div class="w-12 h-12 rounded-xl bg-canvas border border-line flex items-center justify-center text-ink/70 text-[11px] font-semibold cursor-default">QA</div>
+                        <div class="tooltip absolute left-1/2 top-full mt-3 w-44 bg-deep text-white text-[11px] rounded-xl p-3 z-20 shadow-glow"><p class="font-semibold">QA Engineer</p><p class="text-white/60 mt-0.5">Regression & release testing.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ PORTFOLIO / CLIENTS ============ -->
+<section id="portfolio" class="py-28 px-5 md:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-wrap items-end justify-between gap-6 reveal">
+            <div class="max-w-xl">
+                <span class="mono text-[11px] uppercase tracking-wider text-primary">Portfolio</span>
+                <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">Selected work, quick look.</h2>
+            </div>
+            <a href="#contact" class="inline-flex items-center gap-2 rounded-full border border-ink/15 text-ink font-semibold px-5 py-2.5 hover:bg-white transition-colors text-sm">Request Full Case Studies</a>
+        </div>
+
+        <div id="clients" class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-14">
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard">
+                <div class="w-full h-24 rounded-2xl bg-primary/8 flex items-center justify-center mb-4"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M3 13h18M5 13V7l7-3 7 3v6M6 21v-5h12v5" stroke="#5B5FEF" stroke-width="1.6"/></svg></div>
+                <p class="font-display font-700 text-ink">Okaya ASC Suite</p>
+                <p class="text-xs text-muted mt-1.5">Performance, inventory & call dashboards for EV service network.</p>
+            </div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.05s">
+                <div class="w-full h-24 rounded-2xl bg-coral/8 flex items-center justify-center mb-4"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M4 17V9l8-5 8 5v8" stroke="#FF6B4A" stroke-width="1.6"/><path d="M9 21v-6h6v6" stroke="#FF6B4A" stroke-width="1.6"/></svg></div>
+                <p class="font-display font-700 text-ink">Lexcare by Lectrix</p>
+                <p class="text-xs text-muted mt-1.5">EV admin panel migrated to Controller-Service-Repository.</p>
+            </div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.1s">
+                <div class="w-full h-24 rounded-2xl bg-primary/8 flex items-center justify-center mb-4"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="7" height="16" rx="1.5" stroke="#5B5FEF" stroke-width="1.6"/><rect x="14" y="4" width="7" height="10" rx="1.5" stroke="#5B5FEF" stroke-width="1.6"/></svg></div>
+                <p class="font-display font-700 text-ink">Fleet Management</p>
+                <p class="text-xs text-muted mt-1.5">Node.js/TS FMS with Highcharts live tracking dashboards.</p>
+            </div>
+            <div class="reveal rounded-3xl bg-white border border-line p-6 card-hover shadow-softcard" style="transition-delay:.15s">
+                <div class="w-full h-24 rounded-2xl bg-coral/8 flex items-center justify-center mb-4"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M12 4l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V8l8-4z" stroke="#FF6B4A" stroke-width="1.6"/></svg></div>
+                <p class="font-display font-700 text-ink">LMS Platform</p>
+                <p class="text-xs text-muted mt-1.5">React + Firebase LMS with role-based course management.</p>
+            </div>
+        </div>
+
+        <!-- stats bar -->
+        <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 rounded-4xl bg-deep text-white p-8 md:p-10 mesh-dark">
+            <div class="text-center md:text-left"><p class="font-display font-800 text-3xl">200+</p><p class="text-xs text-white/50 mt-1">Project done</p></div>
+            <div class="text-center md:text-left"><p class="font-display font-800 text-3xl">100K+</p><p class="text-xs text-white/50 mt-1">Users worldwide</p></div>
+            <div class="text-center md:text-left"><p class="font-display font-800 text-3xl">5</p><p class="text-xs text-white/50 mt-1">Business countries</p></div>
+            <div class="text-center md:text-left"><p class="font-display font-800 text-3xl">10Y+</p><p class="text-xs text-white/50 mt-1">Business experience</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section id="testimonials" class="py-28 px-5 md:px-8 bg-white border-y border-line">
+    <div class="max-w-7xl mx-auto">
+        <div class="max-w-xl mx-auto text-center reveal">
+            <span class="mono text-[11px] uppercase tracking-wider text-coral">Testimonials</span>
+            <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">What clients say about us.</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-14">
+            <div class="reveal rounded-3xl bg-canvas p-6 card-hover shadow-softcard flex flex-col justify-between h-64">
+                <div>
+                    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" class="text-primary/30 mb-3"><path d="M0 20V11.5C0 4.5 4 0.5 10 0V4.5C7 5 5 7 5 10.5H10V20H0ZM16 20V11.5C16 4.5 20 0.5 26 0V4.5C23 5 21 7 21 10.5H26V20H16Z" fill="currentColor"/></svg>
+                    <p class="text-sm text-ink/80 leading-relaxed">Candour has a good team in terms of delivery and after-delivery support, with excellent understanding of processes.</p>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <div class="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold">PU</div>
+                    <div><p class="text-xs font-semibold text-ink">PD Upadhyay</p><p class="text-[11px] text-muted">Okaya EV, New Delhi</p></div>
+                </div>
+            </div>
+            <div class="reveal rounded-3xl bg-canvas p-6 card-hover shadow-softcard flex flex-col justify-between h-64" style="transition-delay:.05s">
+                <div>
+                    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" class="text-coral/30 mb-3"><path d="M0 20V11.5C0 4.5 4 0.5 10 0V4.5C7 5 5 7 5 10.5H10V20H0ZM16 20V11.5C16 4.5 20 0.5 26 0V4.5C23 5 21 7 21 10.5H26V20H16Z" fill="currentColor"/></svg>
+                    <p class="text-sm text-ink/80 leading-relaxed">We are very happy with Candour — serious and consistent in their work. Programmers have always been there for us.</p>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <div class="w-9 h-9 rounded-full bg-coral/15 flex items-center justify-center text-coral text-xs font-bold">SN</div>
+                    <div><p class="text-xs font-semibold text-ink">Srinivas Nandimala</p><p class="text-[11px] text-muted">Hindware Ltd., Hyderabad</p></div>
+                </div>
+            </div>
+            <div class="reveal rounded-3xl bg-canvas p-6 card-hover shadow-softcard flex flex-col justify-between h-64" style="transition-delay:.1s">
+                <div>
+                    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" class="text-primary/30 mb-3"><path d="M0 20V11.5C0 4.5 4 0.5 10 0V4.5C7 5 5 7 5 10.5H10V20H0ZM16 20V11.5C16 4.5 20 0.5 26 0V4.5C23 5 21 7 21 10.5H26V20H16Z" fill="currentColor"/></svg>
+                    <p class="text-sm text-ink/80 leading-relaxed">Candour helped us build and implement after-sales and repair management processes — delivery and deployment are quick and smooth.</p>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <div class="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold">RS</div>
+                    <div><p class="text-xs font-semibold text-ink">Ravinder S</p><p class="text-[11px] text-muted">Velo Services, Chennai</p></div>
+                </div>
+            </div>
+            <div class="reveal rounded-3xl bg-canvas p-6 card-hover shadow-softcard flex flex-col justify-between h-64" style="transition-delay:.15s">
+                <div>
+                    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" class="text-coral/30 mb-3"><path d="M0 20V11.5C0 4.5 4 0.5 10 0V4.5C7 5 5 7 5 10.5H10V20H0ZM16 20V11.5C16 4.5 20 0.5 26 0V4.5C23 5 21 7 21 10.5H26V20H16Z" fill="currentColor"/></svg>
+                    <p class="text-sm text-ink/80 leading-relaxed">The project manager is a single point of contact doing a great job bringing everything together. QA support is excellent.</p>
+                </div>
+                <div class="flex items-center gap-3 mt-4">
+                    <div class="w-9 h-9 rounded-full bg-coral/15 flex items-center justify-center text-coral text-xs font-bold">PS</div>
+                    <div><p class="text-xs font-semibold text-ink">Prasad S</p><p class="text-[11px] text-muted">Karbonn Mobiles, Bangalore</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CTA BANNER ============ -->
+<section class="py-24 px-5 md:px-8">
+    <div class="max-w-7xl mx-auto reveal">
+        <div class="relative overflow-hidden rounded-5xl bg-deep mesh-dark px-8 py-16 md:px-16 md:py-20 text-center">
+            <div class="absolute top-10 left-10 w-40 h-40 rounded-full bg-primary/25 blur-3xl blob"></div>
+            <div class="absolute bottom-10 right-10 w-52 h-52 rounded-full bg-coral/20 blur-3xl blob" style="animation-delay:-5s"></div>
+            <div class="relative">
+                <span class="mono text-[11px] uppercase tracking-wider text-primary-light">Let's build something reliable</span>
+                <h2 class="font-display font-800 text-4xl md:text-5xl text-white mt-4 max-w-2xl mx-auto leading-tight">Have a dashboard idea? Let's ship it, correctly.</h2>
+                <p class="text-white/60 mt-5 max-w-lg mx-auto">Tell us what your operations team is missing. We'll scope it, build it, and keep it running.</p>
+                <a href="#contact" class="inline-flex items-center gap-2 mt-8 rounded-full bg-white text-ink font-semibold px-7 py-3.5 hover:bg-primary hover:text-white transition-colors shadow-glow">
+                    Talk to Candour
+                    <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="py-28 px-5 md:px-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center reveal">
+            <span class="mono text-[11px] uppercase tracking-wider text-primary">FAQ</span>
+            <h2 class="font-display font-800 text-4xl md:text-5xl text-ink mt-3">Questions, answered.</h2>
+        </div>
+
+        <div class="mt-14 space-y-3 reveal">
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard" open>
+                <summary class="flex items-center justify-between font-display font-700 text-ink">What industries do you work with?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">Mostly automotive, EV service networks and D2C/dealer-driven businesses — anywhere operational data needs to become a trustworthy dashboard.</p>
+            </details>
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard">
+                <summary class="flex items-center justify-between font-display font-700 text-ink">Do you offer white-label dashboard development?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">Yes — we build under your brand with your design system, ready to be resold or deployed internally.</p>
+            </details>
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard">
+                <summary class="flex items-center justify-between font-display font-700 text-ink">How do you ensure data accuracy in dashboards?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">Null-safe helper functions, cross-checked SQL vs. aggregation logic, and derived subqueries for accurate closure-time metrics.</p>
+            </details>
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard">
+                <summary class="flex items-center justify-between font-display font-700 text-ink">Can you migrate our legacy PHP code?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">Yes — we regularly move procedural PHP into a clean Controller → Service → Repository architecture without downtime.</p>
+            </details>
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard">
+                <summary class="flex items-center justify-between font-display font-700 text-ink">Do you provide ongoing support after launch?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">Always. Most of our clients have been with us 5–10 years, adding new modules as they grow.</p>
+            </details>
+            <details class="group rounded-3xl bg-white border border-line p-6 shadow-softcard">
+                <summary class="flex items-center justify-between font-display font-700 text-ink">What's your typical project timeline?
+                    <span class="faq-icon w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center transition-transform"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#5B5FEF" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                </summary>
+                <p class="text-sm text-muted mt-4 leading-relaxed">A single dashboard module usually ships in 2–4 weeks; full admin panels take 6–10 weeks depending on scope.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CONTACT strip ============ -->
+<section id="contact" class="px-5 md:px-8 pb-8">
+    <div class="max-w-7xl mx-auto reveal">
+        <div class="rounded-5xl bg-gradient-to-br from-primary to-primary-dark px-8 py-14 md:px-16 text-center shadow-soft">
+            <h2 class="font-display font-800 text-3xl md:text-4xl text-white">Ready to talk about your dashboard?</h2>
+            <p class="text-white/75 mt-3">info@candoursoft.com · +91-120-4346372</p>
+            <a href="mailto:info@candoursoft.com" class="inline-flex items-center gap-2 mt-7 rounded-full bg-white text-primary font-semibold px-7 py-3.5 hover:bg-ink hover:text-white transition-colors">
+                Email Us <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-deep text-white pt-20 pb-8 px-5 md:px-8 mt-4">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+        <div>
+            <div class="flex items-center gap-2.5 mb-4">
+                <svg width="30" height="30" viewBox="0 0 34 34" fill="none"><path d="M27 6.5C23.7 3.6 19.4 2 17 2 8.7 2 2 8.7 2 17s6.7 15 15 15c4.3 0 8.2-1.8 11-4.7" stroke="#FF6B4A" stroke-width="3.4" stroke-linecap="round"/><circle cx="24" cy="10" r="2.6" fill="#5B5FEF"/></svg>
+                <span class="font-display font-800 text-lg">CANDOUR<span class="text-coral">.</span></span>
+            </div>
+            <p class="text-sm text-white/50 leading-relaxed">We build the software that service-driven businesses run their operations on — dashboards, admin panels and enterprise systems that hold up in production.</p>
+        </div>
+        <div>
+            <p class="font-display font-700 text-sm mb-4">Company</p>
+            <ul class="space-y-2.5 text-sm text-white/50">
+                <li><a href="#about" class="hover:text-white transition-colors">About</a></li>
+                <li><a href="#services" class="hover:text-white transition-colors">Services</a></li>
+                <li><a href="#howwework" class="hover:text-white transition-colors">How We Work</a></li>
+                <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+            </ul>
+        </div>
+        <div>
+            <p class="font-display font-700 text-sm mb-4">Products</p>
+            <ul class="space-y-2.5 text-sm text-white/50">
+                <li><a href="#products" class="hover:text-white transition-colors">Service Dashboards</a></li>
+                <li><a href="#products" class="hover:text-white transition-colors">EV Admin Panels</a></li>
+                <li><a href="#products" class="hover:text-white transition-colors">Fleet Management</a></li>
+                <li><a href="#products" class="hover:text-white transition-colors">LMS Platform</a></li>
+            </ul>
+        </div>
+        <div>
+            <p class="font-display font-700 text-sm mb-4">Get in Touch</p>
+            <ul class="space-y-2.5 text-sm text-white/50">
+                <li>info@candoursoft.com</li>
+                <li>+91-120-4346372</li>
+                <li>Delhi NCR, India</li>
+            </ul>
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto border-t border-white/10 mt-14 pt-6 text-xs text-white/40 flex flex-wrap items-center justify-between gap-3">
+        <p>© <span id="yr"></span> Candour Software. All rights reserved.</p>
+        <p>Designed & engineered by Candour.</p>
+    </div>
+</footer>
+
+<!-- ============ FLOATING AI ASSISTANT ============ -->
+<div class="fixed bottom-5 right-5 md:bottom-7 md:right-7 z-[60] flex flex-col items-end gap-3">
+
+    <!-- chat panel -->
+    <div id="aiChatPanel" class="hidden opacity-0 translate-y-4 scale-95 transition-all duration-300 ease-out w-[92vw] max-w-[360px] h-[540px] max-h-[75vh] rounded-4xl bg-white border border-line shadow-glow flex flex-col overflow-hidden">
+
+        <!-- header -->
+        <div class="relative bg-deep mesh-dark px-5 py-4 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-coral flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="white"/></svg>
+                </div>
+                <div>
+                    <p class="text-white font-display font-700 text-sm leading-tight">Candour AI Assistant</p>
+                    <p class="text-[11px] text-white/50 flex items-center gap-1.5 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>Online now</p>
+                </div>
+            </div>
+            <button id="aiCloseBtn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors shrink-0" aria-label="Close chat">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+
+        <!-- messages -->
+        <div id="aiMessages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-canvas">
+            <div class="flex items-end gap-2">
+                <div class="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="#5B5FEF"/></svg>
+                </div>
+                <div class="bg-white border border-line rounded-2xl rounded-bl-sm px-4 py-2.5 text-[13.5px] text-ink/85 leading-relaxed max-w-[80%] shadow-softcard">
+                    Hi! 👋 Main Candour AI Assistant hoon. Dashboards, admin panels ya kisi project ke baare me poochh sakte ho — ya seedha WhatsApp pe baat kar sakte ho.
+                </div>
+            </div>
+        </div>
+
+        <!-- quick action: whatsapp -->
+        <div class="px-4 pt-3 pb-1 shrink-0 bg-white border-t border-line">
+            <a id="aiWhatsappBtn" href="https://wa.me/916395896677?text=Hi%20Candour%2C%20I%20want%20to%20discuss%20a%20project" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 w-full rounded-full bg-[#25D366] hover:bg-[#1fb958] text-white text-[13px] font-semibold py-2.5 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.32A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm5.2 14.2c-.22.62-1.28 1.18-1.77 1.24-.45.06-1.02.09-1.65-.1-.38-.12-.87-.28-1.5-.55-2.64-1.14-4.36-3.8-4.5-3.98-.13-.18-1.08-1.44-1.08-2.74 0-1.3.68-1.94.92-2.2.24-.26.53-.32.7-.32.18 0 .35 0 .5.01.16.01.38-.06.6.46.22.53.75 1.83.82 1.96.07.13.11.29.02.47-.09.18-.13.29-.27.45-.13.16-.28.35-.4.47-.13.13-.27.27-.12.53.16.26.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.16 1.34.26.13.42.11.57-.07.16-.18.66-.77.84-1.03.18-.27.35-.22.6-.13.24.09 1.53.72 1.79.85.26.13.44.2.5.31.06.12.06.68-.16 1.3z"/></svg>
+                Chat on WhatsApp
+            </a>
+        </div>
+
+        <!-- input -->
+        <form id="aiForm" class="flex items-center gap-2 px-4 py-3 bg-white shrink-0">
+            <input id="aiInput" type="text" autocomplete="off" placeholder="Type your question…"
+                   class="flex-1 rounded-full bg-canvas border border-line px-4 py-2.5 text-[13.5px] text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <button type="submit" class="w-10 h-10 shrink-0 rounded-full bg-primary hover:bg-primary-dark text-white flex items-center justify-center transition-colors" aria-label="Send">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- fab button -->
+    <button id="aiFabBtn" class="group relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-coral shadow-glow flex items-center justify-center" aria-label="Open AI assistant">
+        <span class="absolute inset-0 rounded-full bg-primary/40 animate-ping"></span>
+        <svg id="aiIconOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" class="relative">
+            <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="white"/>
+        </svg>
+        <span class="pointer-events-none absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-deep text-white text-[11.5px] font-medium px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">Ask Candour AI</span>
+    </button>
+</div>
+
+<script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // mobile menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+    // reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ============ AI ASSISTANT WIDGET ============
+    const aiFabBtn = document.getElementById('aiFabBtn');
+    const aiChatPanel = document.getElementById('aiChatPanel');
+    const aiCloseBtn = document.getElementById('aiCloseBtn');
+    const aiForm = document.getElementById('aiForm');
+    const aiInput = document.getElementById('aiInput');
+    const aiMessages = document.getElementById('aiMessages');
+
+    let aiOpen = false;
+
+    function openAiPanel(){
+        aiOpen = true;
+        aiChatPanel.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            aiChatPanel.classList.remove('opacity-0','translate-y-4','scale-95');
+        });
+        aiInput.focus();
+    }
+
+    function closeAiPanel(){
+        aiOpen = false;
+        aiChatPanel.classList.add('opacity-0','translate-y-4','scale-95');
+        setTimeout(() => aiChatPanel.classList.add('hidden'), 300);
+    }
+
+    aiFabBtn.addEventListener('click', () => aiOpen ? closeAiPanel() : openAiPanel());
+    aiCloseBtn.addEventListener('click', closeAiPanel);
+
+    function addBubble(text, from){
+        const row = document.createElement('div');
+        if (from === 'user') {
+            row.className = 'flex items-end gap-2 justify-end';
+            row.innerHTML = `<div class="bg-primary text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-[13.5px] leading-relaxed max-w-[80%] shadow-softcard">${text}</div>`;
+        } else {
+            row.className = 'flex items-end gap-2';
+            row.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="#5B5FEF"/></svg>
+        </div>
+        <div class="bg-white border border-line rounded-2xl rounded-bl-sm px-4 py-2.5 text-[13.5px] text-ink/85 leading-relaxed max-w-[80%] shadow-softcard">${text}</div>`;
+        }
+        aiMessages.appendChild(row);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function addTyping(){
+        const row = document.createElement('div');
+        row.id = 'aiTyping';
+        row.className = 'flex items-end gap-2';
+        row.innerHTML = `
+      <div class="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="#5B5FEF"/></svg>
+      </div>
+      <div class="bg-white border border-line rounded-2xl rounded-bl-sm px-4 py-3 shadow-softcard flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-ink/30 pulse-dot"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-ink/30 pulse-dot" style="animation-delay:.15s"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-ink/30 pulse-dot" style="animation-delay:.3s"></span>
+      </div>`;
+        aiMessages.appendChild(row);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    // NOTE: replace this rule-based function with a real API call (e.g. to your
+    // backend / Claude API) to power genuine AI responses.
+    function getBotReply(msg){
+        const m = msg.toLowerCase();
+        if (m.includes('price') || m.includes('cost') || m.includes('quote') || m.includes('paisa') || m.includes('budget'))
+            return "Pricing depends on scope — dashboard modules usually start small and scale up. Sabse fast tareeka: WhatsApp pe apna requirement bata do, hum same-day quote denge.";
+        if (m.includes('dashboard'))
+            return "Hum ASC performance, inventory aur call-tracking jaise dashboards banate hain — real-time, null-safe data ke saath. Kaunsa data aap dashboard pe dekhna chahte ho?";
+        if (m.includes('contact') || m.includes('call') || m.includes('number') || m.includes('email'))
+            return "Aap info@candoursoft.com pe email kar sakte ho ya neeche WhatsApp button se seedha chat shuru kar sakte ho.";
+        if (m.includes('time') || m.includes('timeline') || m.includes('kitna din') || m.includes('kab tak'))
+            return "Ek dashboard module usually 2–4 weeks me ship hota hai, full admin panel 6–10 weeks — scope pe depend karta hai.";
+        return "Samajh gaya! Iske liye best hoga ki hum WhatsApp pe detail me baat karein — button neeche hai, ya apna sawaal aur specific likh ke bhejo.";
+    }
+
+    aiForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = aiInput.value.trim();
+        if (!val) return;
+        addBubble(val, 'user');
+        aiInput.value = '';
+        addTyping();
+        setTimeout(() => {
+            document.getElementById('aiTyping')?.remove();
+            addBubble(getBotReply(val), 'bot');
+        }, 900);
+    });
+</script>
+</body>
+</html>

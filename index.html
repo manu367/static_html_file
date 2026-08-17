@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard List</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100">
+
+    <div class="max-w-3xl mx-auto px-6 py-12">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                Dashboards
+            </h1>
+            <p class="mt-2 text-gray-500">
+                Select a dashboard to continue
+            </p>
+        </div>
+
+        <!-- Dashboard List -->
+        <div class="space-y-4">
+
+            <!-- AI Dashboard -->
+            <a href="./dashboard_2.html"
+               class="group flex items-center justify-between rounded-xl bg-white p-5 shadow-sm
+                      ring-1 ring-gray-200 transition-all duration-200
+                      hover:-translate-y-1 hover:shadow-lg hover:ring-blue-300">
+
+                <div class="flex items-center gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100
+                                text-blue-600">
+                        🤖
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                            AI Dashboard
+                        </h2>
+                        <p class="text-sm text-gray-500">
+                            Manage and monitor AI insights
+                        </p>
+                    </div>
+                </div>
+
+                <span class="text-xl text-gray-400 transition-transform group-hover:translate-x-1">
+                    →
+                </span>
+            </a>
+
+
+            <!-- ERP / CRM Dashboard -->
+            <a href="./dashboard.html"
+               class="group flex items-center justify-between rounded-xl bg-white p-5 shadow-sm
+                      ring-1 ring-gray-200 transition-all duration-200
+                      hover:-translate-y-1 hover:shadow-lg hover:ring-blue-300">
+
+                <div class="flex items-center gap-4">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100
+                                text-green-600">
+                        📊
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                            ERP / CRM Dashboard
+                        </h2>
+                        <p class="text-sm text-gray-500">
+                            Manage business, sales and customer data
+                        </p>
+                    </div>
+                </div>
+
+                <span class="text-xl text-gray-400 transition-transform group-hover:translate-x-1">
+                    →
+                </span>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
